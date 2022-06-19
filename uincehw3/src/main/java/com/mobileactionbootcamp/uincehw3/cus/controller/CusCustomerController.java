@@ -15,6 +15,7 @@ public class CusCustomerController {
 
     private CusCustomerService cusCustomerService;
 
+    //UPDATE CUSTOMER PASSWORD
     @PatchMapping("/password")
     public ResponseEntity changeCustomerPassword(@RequestParam String oldPassword, String newPassword){
         boolean isChangeSuccessful = cusCustomerService.changePassword(oldPassword, newPassword);
@@ -25,9 +26,10 @@ public class CusCustomerController {
         return ResponseEntity.ok("An ERROR occurred while changing password");
     }
 
+    //CUSTOMER CAN DELETE ITS OWN ACCOUNT ALONG WITH VEHICLES
     @DeleteMapping
-    public ResponseEntity deleteUser(){
-        cusCustomerService.deleteUser();
+    public ResponseEntity deleteUserAndVehicles(){
+        cusCustomerService.deleteUserAndVehicles();
         return ResponseEntity.ok(null);
     }
 }

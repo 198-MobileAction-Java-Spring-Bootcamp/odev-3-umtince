@@ -16,6 +16,7 @@ public class vehVehicleController {
 
     private VehVehicleService vehVehicleService;
 
+    //VEHICLE ADDING
     @PostMapping
     public ResponseEntity saveVehicle(@RequestBody VehVehicleSaveRequestDto vehVehicleSaveRequestDto){
 
@@ -30,6 +31,7 @@ public class vehVehicleController {
         return ResponseEntity.ok(vehVehicleDto);
     }
 
+    //RETURNS VEHICLES BY BRAND NAME
     @GetMapping("/brand/{brand}")
     public ResponseEntity getVehiclesByBrand(@PathVariable String brand){
         List<VehVehicleDto> vehVehicleDtoList = vehVehicleService.getVehiclesByBrand(brand);
@@ -37,6 +39,7 @@ public class vehVehicleController {
         return ResponseEntity.ok(vehVehicleDtoList);
     }
 
+    //RETURNS VEHICLES BY MODEL NAME
     @GetMapping("/model/{model}")
     public ResponseEntity getVehiclesByModel(@PathVariable String model){
         List<VehVehicleDto> vehVehicleDtoList = vehVehicleService.getVehiclesByModel(model);
@@ -44,6 +47,7 @@ public class vehVehicleController {
         return ResponseEntity.ok(vehVehicleDtoList);
     }
 
+    //RETURNS VEHICLES WHICH BELONG TO THE LOGGED IN USER
     @GetMapping("/user")
     public ResponseEntity getVehiclesOfUser(){
         List<VehVehicleDto> vehVehicleDtoList = vehVehicleService.getVehiclesOfUser();
@@ -51,6 +55,7 @@ public class vehVehicleController {
         return ResponseEntity.ok(vehVehicleDtoList);
     }
 
+    //UPDATES VEHICLE WHICH BELONGS TO THE LOGGED IN USER
     @PatchMapping("/update/{id}")
     public ResponseEntity updateVehicle(@PathVariable Long id ,@RequestBody VehVehicleSaveRequestDto vehVehicleSaveRequestDto){
         VehVehicleDto vehVehicleDto = null;
@@ -62,6 +67,7 @@ public class vehVehicleController {
         }
     }
 
+    //DELETES VEHICLES WHICH BELONGS TO THE LOGGED IN USER
     @DeleteMapping("/delete/{id}")
     public ResponseEntity deleteVehicle(@PathVariable Long id){
         String returnMessage = "";

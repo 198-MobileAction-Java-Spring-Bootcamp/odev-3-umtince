@@ -23,10 +23,15 @@ public class CusCustomerService {
     private VehVehicleService vehVehicleService;
 
     public CusCustomerDto customerSignUp(CusCustomerSignUpDto cusCustomerSignUpDto) {
+
+        //CHECKS IF THERE ARE ANY USERNAME IDENTICAL TO THE DTO
         if(findInDB(cusCustomerSignUpDto.getUsername()) == null){
             CusCustomer cusCustomer = CusCustomerMapper.INSTANCE.convertToCusCustomer(cusCustomerSignUpDto);
+
+            //CHECKS UF THERE ARE NULL FIELDS
             if (!hasNullProperty(cusCustomer)){
 
+                //ENCODES PASSWORD
                 String encodedPassword = passwordEncoder.encode(cusCustomer.getPassword());
                 cusCustomer.setPassword(encodedPassword);
 
@@ -35,9 +40,11 @@ public class CusCustomerService {
                 return cusCustomerDto;
             }
         }
+        //RETURNS NULL IF cusCustomerSignUpDto CAN'T PASS CHECKS
         return null;
     }
 
+    //RETURNS CUSTOMER IF GIVEN USERNAME EXISTS IN DB, OTHERWISE RETURNS NULL
     public CusCustomer findInDB(String username){
         List<CusCustomer> cusCustomerList = cusCustomerDao.findAll();
 
@@ -49,6 +56,7 @@ public class CusCustomerService {
         return null;
     }
 
+    //FINDS AND RETURNS CUSTOMER BY ID FROM THE DB
     public CusCustomer findById(Long id){
         CusCustomer cusCustomer = cusCustomerDao.findById(id).orElseThrow();
         return cusCustomer;
@@ -75,6 +83,8 @@ public class CusCustomerService {
         CusCustomer cusCustomer = findInDB(userDetails.getUsername());
 
         if(cusCustomer != null){
+
+            //CHECKS IF THE STORED ENCODED PASSWORD MATCHES WITH OLD PASSWORD
             if(passwordEncoder.matches(oldPassword, cusCustomer.getPassword())){
                 String encodedPassword = passwordEncoder.encode(newPassword);
                 cusCustomer.setPassword(encodedPassword);
@@ -85,10 +95,12 @@ public class CusCustomerService {
         return false;
     }
 
+    //RETURNS LOGGED IN CUSTOMER'S USER DETAILS
     public UserDetails getLoggedUserDetails(){
         return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    //RETURNS LOGGED IN CUSTOMER
     public CusCustomer getLoggedCustomer(){
         UserDetails userDetails = getLoggedUserDetails();
         CusCustomer cusCustomer = findInDB(userDetails.getUsername());
@@ -96,7 +108,8 @@ public class CusCustomerService {
         return cusCustomer;
     }
 
-    public void deleteUser() {
+    //DELETES USER AND THE VEHICLES BELONG TO THE USER
+    public void deleteUserAndVehicles() {
         CusCustomer cusCustomer = getLoggedCustomer();
         vehVehicleService.deleteVehiclesByUserId(cusCustomer.getId());
         cusCustomerDao.delete(cusCustomer);

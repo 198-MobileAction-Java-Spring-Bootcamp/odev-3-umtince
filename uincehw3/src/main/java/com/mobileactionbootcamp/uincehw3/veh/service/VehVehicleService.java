@@ -21,6 +21,7 @@ public class VehVehicleService {
     private VehVehicleDao vehVehicleDao;
     private CusCustomerService cusCustomerService;
 
+    //INJECTED USING LAZY CONSTRUCTOR TO PREVENT CIRCULAR DEPENDENCY
     private VehVehicleService(@Lazy CusCustomerService cusCustomerService){
         this.cusCustomerService = cusCustomerService;
     }
@@ -28,8 +29,10 @@ public class VehVehicleService {
     public VehVehicleDto saveVehicle(VehVehicleSaveRequestDto vehVehicleSaveRequestDto) throws Exception{
         VehVehicle vehVehicle = null;
 
+        //CHECKS IF LICENSE PLATE IS IN USE BY ANOTHER VEHICLE
         isVehicleExists(vehVehicleSaveRequestDto.getLicensePlate());
 
+        //CHECKS THE INTEGRITY OF THE FIELDS
         if(checkInputIntegrity(vehVehicleSaveRequestDto)){
             vehVehicle = VehVehicleMapper.INSTANCE.convertToVehVehicle(vehVehicleSaveRequestDto);
             CusCustomer cusCustomer = cusCustomerService.getLoggedCustomer();
@@ -39,6 +42,7 @@ public class VehVehicleService {
         return VehVehicleMapper.INSTANCE.convertToVehVehicleDto(vehVehicle);
     }
 
+    //CHECKS AND THROWS EXCEPTION IF LICENSE PLATE ALREADY EXISTS IN THE DB
     private void isVehicleExists(String licensePlate) throws Exception{
         List<VehVehicle> vehVehicleList = getAllVehicles();
 
@@ -49,9 +53,11 @@ public class VehVehicleService {
         }
     }
 
+    //RETURNS ALL VEHICLES IN THE DB
     private List<VehVehicle> getAllVehicles(){
         return vehVehicleDao.findAll();
     }
+
     private boolean checkInputIntegrity(VehVehicleSaveRequestDto vehVehicleSaveRequestDto) throws Exception{
 
         if(checkModelYear(vehVehicleSaveRequestDto.getModelYear()) == false){
@@ -99,6 +105,7 @@ public class VehVehicleService {
         return true;
     }
 
+    //RETURNS VEHICLES BY BRAND NAME
     public List<VehVehicleDto> getVehiclesByBrand(String brandName) {
         List<VehVehicleDto> vehVehicleDtoList = new ArrayList<>();
         List<VehVehicle> vehVehicleList = getAllVehicles();
@@ -111,6 +118,7 @@ public class VehVehicleService {
         return vehVehicleDtoList;
     }
 
+    //RETURNS VEHICLES BY MODEL NAME
     public List<VehVehicleDto> getVehiclesByModel(String modelName) {
         List<VehVehicleDto> vehVehicleDtoList = new ArrayList<>();
         List<VehVehicle> vehVehicleList = getAllVehicles();
@@ -123,6 +131,7 @@ public class VehVehicleService {
         return vehVehicleDtoList;
     }
 
+    //RETURNS THE VEHICLES OF THE LOGGED IN USER
     public List<VehVehicleDto> getVehiclesOfUser() {
         List<VehVehicleDto> userVehicleList = new ArrayList<>();
         List<VehVehicle> vehVehicleList = getAllVehicles();
@@ -137,6 +146,7 @@ public class VehVehicleService {
         return userVehicleList;
     }
 
+    //DELETES VEHICLES BELONG TO THE LOGGED IN USER VIA VEHICLE ID
     public void deleteVehiclesByUserId(Long userId){
         List<VehVehicle> vehVehicleList = getAllVehicles();
 
@@ -147,10 +157,12 @@ public class VehVehicleService {
         }
     }
 
+    //RETURNS VEHICLES BY ID
     private VehVehicle getVehicleById(Long id){
         return vehVehicleDao.findById(id).orElse(null);
     }
 
+    //UPDATES LOGGED IN USER'S VEHICLE'S FIELDS
     public VehVehicleDto updateVehicle(Long id, VehVehicleSaveRequestDto vehVehicleSaveRequestDto) throws Exception {
 
         checkInputIntegrity(vehVehicleSaveRequestDto);
@@ -192,12 +204,15 @@ public class VehVehicleService {
         }
     }
 
+    //DELETES THE LOGGED IN USER'S VEHICLE VIA VEHICLE ID
     public String deleteVehicleById(Long id) throws Exception{
         VehVehicle vehVehicle = getVehicleById(id);
+        //checks if there are any vehicle with given id
         if(vehVehicle == null){
             throw new Exception("No vehicle found with the given id!");
         }
 
+        //checks is logged in user has a vehicle with the given id
         String usernameOfLoggedCustomer = cusCustomerService.getLoggedUserDetails().getUsername();
         if(vehVehicle.getCustomer().getUsername().equals(usernameOfLoggedCustomer) == false){
             throw new Exception("You don't own a vehicle with the given id!");

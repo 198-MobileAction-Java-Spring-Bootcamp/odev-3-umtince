@@ -156,38 +156,39 @@ public class VehVehicleService {
         checkInputIntegrity(vehVehicleSaveRequestDto);
         //if not throws exception & does not continue to execute lines under
 
-        List<VehVehicle> vehVehicleList = getAllVehicles();
-        String usernameOfLoggedCustomer = cusCustomerService.getLoggedUserDetails().getUsername();
-
+        //is there a vehicle with the given id
         VehVehicle vehicleToBeUpdated = getVehicleById(id);
-
         if(vehicleToBeUpdated == null){
             throw new Exception("No vehicle found with the given id!");
         }
 
-        //does the vehicle belong to the logged customer
-        if(vehicleToBeUpdated.getId().equals(id) && vehicleToBeUpdated.getCustomer().getUsername().equals(usernameOfLoggedCustomer)){
-            for (VehVehicle vehicle : vehVehicleList){
 
-                //proceeds if the license plate belongs to a vehicle owned by the logged customer
-                if(vehVehicleSaveRequestDto.getLicensePlate().equals(vehicle.getLicensePlate()) && vehicle.getCustomer().getUsername().equals(usernameOfLoggedCustomer)){
-                    vehicle.setModelYear(vehVehicleSaveRequestDto.getModelYear());
-                    vehicle.setModelName(vehVehicleSaveRequestDto.getModelName());
-                    vehicle.setLicensePlate(vehVehicleSaveRequestDto.getLicensePlate());
-                    vehicle.setBrandName(vehVehicleSaveRequestDto.getBrandName());
-                    vehicle = vehVehicleDao.save(vehicle);
-                    return VehVehicleMapper.INSTANCE.convertToVehVehicleDto(vehicle);
-                }
-                else{
-                    throw new Exception("The license plate you like to update belongs to a vehicle that is not owned by you!");
-                }
+        //who owns the license plate in the request body
+        List<VehVehicle> vehVehicleList = getAllVehicles();
+        String usernameOfLicensePlateOwner = null;
+        for (VehVehicle vehicle : vehVehicleList){
+            if(vehVehicleSaveRequestDto.getLicensePlate().equals(vehicle.getLicensePlate())){
+                usernameOfLicensePlateOwner = vehicle.getCustomer().getUsername();
             }
+        }
+
+        //checks if the logged customer owns the yet to be updated license plate
+        String usernameOfLoggedCustomer = cusCustomerService.getLoggedUserDetails().getUsername();
+        if(usernameOfLicensePlateOwner != null && usernameOfLicensePlateOwner.equals(usernameOfLoggedCustomer) == false){
+            throw new Exception("The license plate you like to update belongs to a vehicle that is not owned by you!");
+        }
+
+        //does the vehicle belong to the logged customer
+        if(vehicleToBeUpdated.getCustomer().getUsername().equals(usernameOfLoggedCustomer)){
+            vehicleToBeUpdated.setModelYear(vehVehicleSaveRequestDto.getModelYear());
+            vehicleToBeUpdated.setModelName(vehVehicleSaveRequestDto.getModelName());
+            vehicleToBeUpdated.setLicensePlate(vehVehicleSaveRequestDto.getLicensePlate());
+            vehicleToBeUpdated.setBrandName(vehVehicleSaveRequestDto.getBrandName());
+            vehicleToBeUpdated = vehVehicleDao.save(vehicleToBeUpdated);
+            return VehVehicleMapper.INSTANCE.convertToVehVehicleDto(vehicleToBeUpdated);
         }
         else {
             throw new Exception("You don't own a vehicle with the given id!");
         }
-
-
-        return null;
     }
 }

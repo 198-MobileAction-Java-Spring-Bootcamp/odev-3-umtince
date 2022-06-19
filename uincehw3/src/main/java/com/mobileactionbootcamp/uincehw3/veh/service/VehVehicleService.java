@@ -191,4 +191,20 @@ public class VehVehicleService {
             throw new Exception("You don't own a vehicle with the given id!");
         }
     }
+
+    public String deleteVehicleById(Long id) throws Exception{
+        VehVehicle vehVehicle = getVehicleById(id);
+        if(vehVehicle == null){
+            throw new Exception("No vehicle found with the given id!");
+        }
+
+        String usernameOfLoggedCustomer = cusCustomerService.getLoggedUserDetails().getUsername();
+        if(vehVehicle.getCustomer().getUsername().equals(usernameOfLoggedCustomer) == false){
+            throw new Exception("You don't own a vehicle with the given id!");
+        }
+
+        vehVehicleDao.delete(vehVehicle);
+
+        return "Deleted successfully!";
+    }
 }

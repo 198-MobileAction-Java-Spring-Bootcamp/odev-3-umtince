@@ -61,4 +61,15 @@ public class vehVehicleController {
             return ResponseEntity.ok(e.getMessage());
         }
     }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity deleteVehicle(@PathVariable Long id){
+        String returnMessage = "";
+        try {
+            returnMessage = vehVehicleService.deleteVehicleById(id);
+            return ResponseEntity.ok(returnMessage);
+        }catch (Exception e){
+            return ResponseEntity.ok(e.getMessage());
+        }
+    }
 }
